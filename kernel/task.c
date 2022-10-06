@@ -1,6 +1,6 @@
 #include <ucx.h>
 
-int32_t ucx_task_add(void *task, uint16_t guard_size)
+int32_t ucx_task_add(void *task, uint16_t guard_size, uint8_t capacity, uint8_t period)
 {
 	struct tcb_s *tcb_last = kcb_p->tcb_p;
 	
@@ -20,6 +20,9 @@ int32_t ucx_task_add(void *task, uint16_t guard_size)
 	kcb_p->tcb_p->id = kcb_p->id++;
 	kcb_p->tcb_p->state = TASK_STOPPED;
 	kcb_p->tcb_p->priority = TASK_NORMAL_PRIO;
+	kcb_p->tcb_p->period = period;
+	kcb_p->tcb_p->capacity = capacity;
+	kcb_p->tcb_p->remaining_capacity = capacity;
 	
 	return 0;
 }
