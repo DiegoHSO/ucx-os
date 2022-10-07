@@ -21,6 +21,7 @@ int32_t ucx_task_add(void *task, uint16_t guard_size, uint8_t capacity, uint8_t 
 	kcb_p->tcb_p->state = TASK_STOPPED;
 	kcb_p->tcb_p->priority = TASK_NORMAL_PRIO;
 	kcb_p->tcb_p->period = period;
+	kcb_p->tcb_p->remaining_period = period;
 	kcb_p->tcb_p->capacity = capacity;
 	kcb_p->tcb_p->remaining_capacity = capacity;
 	
