@@ -1,6 +1,6 @@
 #include <ucx.h>
 
-int32_t ucx_task_add(void *task, uint16_t guard_size, uint8_t capacity, uint8_t period)
+int32_t ucx_task_add(void *task, uint16_t guard_size, uint16_t capacity, uint16_t period)
 {
 	struct tcb_s *tcb_last = kcb_p->tcb_p;
 	

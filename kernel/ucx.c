@@ -124,7 +124,7 @@ void krnl_dispatcher(void)
 	if (!setjmp(kcb_p->tcb_p->context)) {
 		krnl_delay_update();
 		krnl_guard_check();
-		id = krnl_rm();
+		uint16_t id = krnl_rm();
 		if (id < 0)
 			krnl_schedule();
 
