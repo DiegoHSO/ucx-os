@@ -55,9 +55,10 @@ void krnl_guard_check(void);
 void krnl_delay_update(void);
 void krnl_sched_init(int32_t preemptive);
 uint16_t krnl_schedule(void);
+uint16_t krnl_rm(void);
 void krnl_dispatcher(void);
 
-int32_t ucx_task_add(void *task, uint16_t guard_size);
+int32_t ucx_task_add(void *task, uint16_t guard_size, uint16_t capacity, uint16_t period);
 void ucx_task_init();
 void ucx_task_yield();
 void ucx_task_delay(uint16_t ticks);

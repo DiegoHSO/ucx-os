@@ -79,38 +79,41 @@ uint16_t krnl_schedule(void)
 }
 
 // task perdeu deadline? ignora o resto das computacoes e segue em frente
-void krnl_rm(void)
+uint16_t krnl_rm(void)
 {
 	kcb_p->tcb_p->remaining_capacity = kcb_p->tcb_p->remaining_capacity - 1;
-	
+
 	// lembrar de descontar o remaining_period de cada tarefa a cada interrupcao
 	if (kcb_p->tcb_p->state == TASK_RUNNING)
 		kcb_p->tcb_p->state = TASK_READY;
 
-	uint16_t lowest_period = kcb_p->tcb_p->period;
+	struct tcb_s *tcb = kcb_p->tcb_p;
+	struct tcb_s *lowest_period_tcb = kcb_p->tcb_p;
 
 	do {
 		do {
 			kcb_p->tcb_p = kcb_p->tcb_p->tcb_next;
-			kcb_p->tcb_p->remaining_period = kcb_p->tcb_p->remaining_period - 1;
-		} while (kcb_p->tcb_p->period != -1);
+			kcb_p->tcb_p->remaining_capacity = kcb_p->tcb_p->remaining_period == 0 ? kcb_p->tcb_p->capacity : kcb_p->tcb_p->remaining_capacity;
+			kcb_p->tcb_p->remaining_period = kcb_p->tcb_p->remaining_period == 0 ? kcb_p->tcb_p->period : kcb_p->tcb_p->remaining_period - 1;
+		} while (kcb_p->tcb_p->period > -1);
 	} while (kcb_p->tcb_p != tcb);
 	
 	do {
 		do {
 			kcb_p->tcb_p = kcb_p->tcb_p->tcb_next;
-			kcb_p->tcb_p->remaining_period = kcb_p->tcb_p->remaining_period - 1;
-		} while (kcb_p->tcb_p->period > lowest_period && kcb_p->tcb_p->remaining_capacity != 0);
+		} while (kcb_p->tcb_p->state != TASK_READY || 
+				 kcb_p->tcb_p->period == -1 || 
+				 (kcb_p->tcb_p->period > lowest_period_tcb->period && kcb_p->tcb_p->remaining_capacity != 0));
+		lowest_period_tcb = kcb_p->tcb_p;
 	} while (kcb_p->tcb_p != tcb);
 
-	do {
-		kcb_p->tcb_p = kcb_p->tcb_p->tcb_next;
-	} while (kcb_p->tcb_p->state != TASK_READY || kcb_p->tcb_p->period == -1); // de todas as tarefas que estao prontas
-	kcb_p->tcb_p->priority |= (kcb_p->tcb_p->priority >> 8) & 0xff;
+	// do {
+	// 	kcb_p->tcb_p = kcb_p->tcb_p->tcb_next;
+	// } while (kcb_p->tcb_p->state != TASK_READY || kcb_p->tcb_p->period == -1); // de todas as tarefas que estao prontas
 	kcb_p->tcb_p->state = TASK_RUNNING;
 	kcb_p->ctx_switches++; // incrementa o numero de trocas de contexto
 	
-	return kcb_p->tcb_p->id;
+	return lowest_period_tcb == tcb ? -1 : lowest_period_tcb->id;
 		// if (kcb_p->tcb_p->period > 0)
 		// 	// chamar escalonador RM
 		// else 
