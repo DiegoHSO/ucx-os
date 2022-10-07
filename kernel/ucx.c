@@ -56,7 +56,7 @@ uint16_t krnl_schedule(void)
 	if (kcb_p->tcb_p->state == TASK_RUNNING)
 		kcb_p->tcb_p->state = TASK_READY;
 	// inicio do round robin
-	struct tcb_s *tcb = *(kcb_p->tcb_p);
+	struct tcb_s *tcb = kcb_p->tcb_p;
 	
 	do {
 		do {
