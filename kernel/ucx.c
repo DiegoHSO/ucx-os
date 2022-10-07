@@ -88,24 +88,32 @@ uint16_t krnl_rm(void)
 		kcb_p->tcb_p->state = TASK_READY;
 
 	struct tcb_s *tcb = kcb_p->tcb_p;
-	struct tcb_s *lowest_period_tcb = kcb_p->tcb_p;
+	uint16_t lowest_period = 65535;
+	uint16_t id = -1;
 
+
+	printf("consegui chegar aqui em cima\n");
 	do {
 		do {
 			kcb_p->tcb_p = kcb_p->tcb_p->tcb_next;
-			kcb_p->tcb_p->remaining_capacity = kcb_p->tcb_p->remaining_period == 0 ? kcb_p->tcb_p->capacity : kcb_p->tcb_p->remaining_capacity;
-			kcb_p->tcb_p->remaining_period = kcb_p->tcb_p->remaining_period == 0 ? kcb_p->tcb_p->period : kcb_p->tcb_p->remaining_period - 1;
-		} while (kcb_p->tcb_p->period > -1);
+		} while (kcb_p->tcb_p->period == -1);
+		printf("periodo da proxima tarefa %d\n", kcb_p->tcb_p->period);
+		kcb_p->tcb_p->remaining_capacity = kcb_p->tcb_p->remaining_period == 0 ? kcb_p->tcb_p->capacity : kcb_p->tcb_p->remaining_capacity;
+		kcb_p->tcb_p->remaining_period = kcb_p->tcb_p->remaining_period == 0 ? kcb_p->tcb_p->period : kcb_p->tcb_p->remaining_period - 1;
 	} while (kcb_p->tcb_p != tcb);
-	
+	printf("consegui chegar aqui\n");
 	do {
+		id = kcb_p->tcb_p->id;
 		do {
 			kcb_p->tcb_p = kcb_p->tcb_p->tcb_next;
 		} while (kcb_p->tcb_p->state != TASK_READY || 
-				 kcb_p->tcb_p->period == -1 || 
-				 (kcb_p->tcb_p->period > lowest_period_tcb->period && kcb_p->tcb_p->remaining_capacity != 0));
-		lowest_period_tcb = kcb_p->tcb_p;
-	} while (kcb_p->tcb_p != tcb);
+				 kcb_p->tcb_p->period == -1 ||
+				 kcb_p->tcb_p->remaining_capacity == 0 || 
+				 kcb_p->tcb_p->period > lowest_period);
+		printf("achei uma tarefa de menor periodo! o periodo atual eh %d e o periodo da proxima tarefa eh %d, com capacidade %d e periodo restante %d\n", lowest_period, kcb_p->tcb_p->period, kcb_p->tcb_p->remaining_capacity, kcb_p->tcb_p->remaining_period);
+		lowest_period = kcb_p->tcb_p->period;
+		// id = kcb_p->tcb_p->id;
+	} while (kcb_p->tcb_p->id != id);
 
 	// do {
 	// 	kcb_p->tcb_p = kcb_p->tcb_p->tcb_next;
@@ -113,7 +121,7 @@ uint16_t krnl_rm(void)
 	kcb_p->tcb_p->state = TASK_RUNNING;
 	kcb_p->ctx_switches++; // incrementa o numero de trocas de contexto
 	
-	return lowest_period_tcb == tcb ? -1 : lowest_period_tcb->id;
+	return id;
 		// if (kcb_p->tcb_p->period > 0)
 		// 	// chamar escalonador RM
 		// else 
