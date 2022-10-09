@@ -65,7 +65,10 @@ void ucx_task_init(void)
 	if (!setjmp(kcb_p->tcb_p->context)) {
 		kcb_p->tcb_p->state = TASK_READY;
 		if (kcb_p->tcb_p->tcb_next == kcb_p->tcb_first) {
-			kcb_p->tcb_p->state = TASK_RUNNING;
+			// PERGUNTAR SE EH SEGURO FAZER ISSO
+			kcb_p->tcb_p = kcb_p->tcb_p->tcb_next;
+			// FIM PERGUNTA
+			kcb_p->tcb_p->state = TASK_RUNNING;			
 		} else {
 			kcb_p->tcb_p = kcb_p->tcb_p->tcb_next;
 			kcb_p->tcb_p->state = TASK_RUNNING;
