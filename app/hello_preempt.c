@@ -37,7 +37,7 @@ int32_t app_main(void)
 {
 	ucx_task_add(task0, DEFAULT_GUARD_SIZE, 4, 8);
 	ucx_task_add(task1, DEFAULT_GUARD_SIZE, 2, 4);
-	ucx_task_add(task2, DEFAULT_GUARD_SIZE, 1, 2);
+	ucx_task_add(task2, DEFAULT_GUARD_SIZE, 0, -1);
 	
 	ucx_task_priority(2, TASK_LOW_PRIO);
 

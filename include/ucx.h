@@ -30,8 +30,8 @@ struct tcb_s {
 	uint16_t delay;
 	uint16_t priority;
 	uint8_t state;
-	uint16_t period;
-	uint16_t remaining_period;
+	int16_t period;
+	int16_t remaining_period;
 	uint16_t capacity;
 	uint16_t remaining_capacity;
 };
@@ -55,7 +55,7 @@ void krnl_guard_check(void);
 void krnl_delay_update(void);
 void krnl_sched_init(int32_t preemptive);
 uint16_t krnl_schedule(void);
-uint16_t krnl_rm(void);
+int16_t krnl_rm(void);
 void krnl_dispatcher(void);
 
 int32_t ucx_task_add(void *task, uint16_t guard_size, uint16_t capacity, uint16_t period);
