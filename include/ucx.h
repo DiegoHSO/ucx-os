@@ -30,8 +30,8 @@ struct tcb_s {
 	uint16_t delay;
 	uint16_t priority;
 	uint8_t state;
-	int16_t period;
-	int16_t remaining_period;
+	uint16_t period;
+	uint16_t remaining_period;
 	uint16_t capacity;
 	uint16_t remaining_capacity;
 };
