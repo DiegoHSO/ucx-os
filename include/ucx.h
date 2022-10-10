@@ -34,7 +34,7 @@ struct tcb_s {
 	uint16_t remaining_period;
 	uint16_t capacity;
 	uint16_t remaining_capacity;
-	uint16_t deadline_losses;
+	uint16_t deadline_misses;
 };
 
 /* kernel control block */

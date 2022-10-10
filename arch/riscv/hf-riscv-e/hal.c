@@ -12,41 +12,50 @@ libc basic I/O support
 */
 
 #ifndef DEBUG_PORT
-void _putchar(char value){		// polled putchar()
-	while (UARTCAUSE & MASK_UART0_WRITEBUSY);
+void _putchar(char value)
+{ // polled putchar()
+	while (UARTCAUSE & MASK_UART0_WRITEBUSY)
+		;
 	UART0 = value;
 }
 
-int32_t _kbhit(void){
+int32_t _kbhit(void)
+{
 	return UARTCAUSE & MASK_UART0_DATAAVAIL;
 }
 
-int32_t _getchar(void){			// polled getch()
-	while (!_kbhit());
+int32_t _getchar(void)
+{ // polled getch()
+	while (!_kbhit())
+		;
 	return UART0;
 }
 #else
-void _putchar(char value){		// polled putchar()
+void _putchar(char value)
+{ // polled putchar()
 	DEBUG_ADDR = value;
 }
 
-int32_t _kbhit(void){
+int32_t _kbhit(void)
+{
 	return 0;
 }
 
-int32_t _getchar(void){			// polled getch()
+int32_t _getchar(void)
+{ // polled getch()
 	return DEBUG_ADDR;
 }
 #endif
-
 
 /*
 software implementation of multiply/divide and 64-bit routines
 */
 
-typedef union{
+typedef union
+{
 	int64_t all;
-	struct{
+	struct
+	{
 #if LITTLE_ENDIAN
 		uint32_t low;
 		int32_t high;
@@ -57,11 +66,13 @@ typedef union{
 	} s;
 } dwords;
 
-int32_t __mulsi3(uint32_t a, uint32_t b){
+int32_t __mulsi3(uint32_t a, uint32_t b)
+{
 	uint32_t answer = 0;
 
-	while(b){
-		if(b & 1)
+	while (b)
+	{
+		if (b & 1)
 			answer += a;
 		a <<= 1;
 		b >>= 1;
@@ -69,7 +80,8 @@ int32_t __mulsi3(uint32_t a, uint32_t b){
 	return answer;
 }
 
-int64_t __muldsi3(uint32_t a, uint32_t b){
+int64_t __muldsi3(uint32_t a, uint32_t b)
+{
 	dwords r;
 
 	const int32_t bits_in_word_2 = (int32_t)(sizeof(int32_t) * 8) / 2;
@@ -90,7 +102,8 @@ int64_t __muldsi3(uint32_t a, uint32_t b){
 	return r.all;
 }
 
-int64_t __muldi3(int64_t a, int64_t b){
+int64_t __muldi3(int64_t a, int64_t b)
+{
 	dwords x;
 	x.all = a;
 	dwords y;
@@ -102,16 +115,20 @@ int64_t __muldi3(int64_t a, int64_t b){
 	return r.all;
 }
 
-uint32_t __udivmodsi4(uint32_t num, uint32_t den, int32_t modwanted){
+uint32_t __udivmodsi4(uint32_t num, uint32_t den, int32_t modwanted)
+{
 	uint32_t bit = 1;
 	uint32_t res = 0;
 
-	while (den < num && bit && !(den & (1L << 31))) {
+	while (den < num && bit && !(den & (1L << 31)))
+	{
 		den <<= 1;
 		bit <<= 1;
 	}
-	while (bit){
-		if (num >= den){
+	while (bit)
+	{
+		if (num >= den)
+		{
 			num -= den;
 			res |= bit;
 		}
@@ -123,16 +140,19 @@ uint32_t __udivmodsi4(uint32_t num, uint32_t den, int32_t modwanted){
 	return res;
 }
 
-int32_t __divsi3(int32_t a, int32_t b){
+int32_t __divsi3(int32_t a, int32_t b)
+{
 	int32_t neg = 0;
 	int32_t res;
 
-	if (a < 0){
+	if (a < 0)
+	{
 		a = -a;
 		neg = !neg;
 	}
 
-	if (b < 0){
+	if (b < 0)
+	{
 		b = -b;
 		neg = !neg;
 	}
@@ -145,11 +165,13 @@ int32_t __divsi3(int32_t a, int32_t b){
 	return res;
 }
 
-int32_t __modsi3(int32_t a, int32_t b){
+int32_t __modsi3(int32_t a, int32_t b)
+{
 	int32_t neg = 0;
 	int32_t res;
 
-	if (a < 0){
+	if (a < 0)
+	{
 		a = -a;
 		neg = 1;
 	}
@@ -165,15 +187,18 @@ int32_t __modsi3(int32_t a, int32_t b){
 	return res;
 }
 
-uint32_t __udivsi3 (uint32_t a, uint32_t b){
+uint32_t __udivsi3(uint32_t a, uint32_t b)
+{
 	return __udivmodsi4(a, b, 0);
 }
 
-uint32_t __umodsi3 (uint32_t a, uint32_t b){
+uint32_t __umodsi3(uint32_t a, uint32_t b)
+{
 	return __udivmodsi4(a, b, 1);
 }
 
-int64_t __ashldi3(int64_t u, uint32_t b){
+int64_t __ashldi3(int64_t u, uint32_t b)
+{
 	dwords uu, w;
 	uint32_t bm;
 
@@ -183,20 +208,24 @@ int64_t __ashldi3(int64_t u, uint32_t b){
 	uu.all = u;
 	bm = 32 - b;
 
-	if (bm <= 0){
+	if (bm <= 0)
+	{
 		w.s.low = 0;
-		w.s.high = (uint32_t) uu.s.low << -bm;
-	}else{
-		const uint32_t carries = (uint32_t) uu.s.low >> bm;
+		w.s.high = (uint32_t)uu.s.low << -bm;
+	}
+	else
+	{
+		const uint32_t carries = (uint32_t)uu.s.low >> bm;
 
-		w.s.low = (uint32_t) uu.s.low << b;
-		w.s.high = ((uint32_t) uu.s.high << b) | carries;
+		w.s.low = (uint32_t)uu.s.low << b;
+		w.s.high = ((uint32_t)uu.s.high << b) | carries;
 	}
 
 	return w.all;
 }
 
-int64_t __ashrdi3(int64_t u, uint32_t b){
+int64_t __ashrdi3(int64_t u, uint32_t b)
+{
 	dwords uu, w;
 	uint32_t bm;
 
@@ -206,21 +235,25 @@ int64_t __ashrdi3(int64_t u, uint32_t b){
 	uu.all = u;
 	bm = 32 - b;
 
-	if (bm <= 0){
+	if (bm <= 0)
+	{
 		/* w.s.high = 1..1 or 0..0 */
 		w.s.high = uu.s.high >> 31;
 		w.s.low = uu.s.low >> -bm;
-	}else{
-		const uint32_t carries = (uint32_t) uu.s.high << bm;
+	}
+	else
+	{
+		const uint32_t carries = (uint32_t)uu.s.high << bm;
 
 		w.s.high = uu.s.high >> b;
-		w.s.low = ((uint32_t) uu.s.low >> b) | carries;
+		w.s.low = ((uint32_t)uu.s.low >> b) | carries;
 	}
 
 	return w.all;
 }
 
-int64_t __lshrdi3(int64_t u, uint32_t b){
+int64_t __lshrdi3(int64_t u, uint32_t b)
+{
 	dwords uu, w;
 	uint32_t bm;
 
@@ -230,34 +263,42 @@ int64_t __lshrdi3(int64_t u, uint32_t b){
 	uu.all = u;
 	bm = 32 - b;
 
-	if (bm <= 0){
+	if (bm <= 0)
+	{
 		w.s.high = 0;
-		w.s.low = (uint32_t) uu.s.high >> -bm;
-	}else{
-		const uint32_t carries = (uint32_t) uu.s.high << bm;
+		w.s.low = (uint32_t)uu.s.high >> -bm;
+	}
+	else
+	{
+		const uint32_t carries = (uint32_t)uu.s.high << bm;
 
-		w.s.high = (uint32_t) uu.s.high >> b;
-		w.s.low = ((uint32_t) uu.s.low >> b) | carries;
+		w.s.high = (uint32_t)uu.s.high >> b;
+		w.s.low = ((uint32_t)uu.s.low >> b) | carries;
 	}
 
 	return w.all;
 }
 
-uint64_t __udivmoddi4(uint64_t num, uint64_t den, uint64_t *rem_p){
+uint64_t __udivmoddi4(uint64_t num, uint64_t den, uint64_t *rem_p)
+{
 	uint64_t quot = 0, qbit = 1;
 
-	if (den == 0){
-//		return 1 / ((uint32_t)den);
+	if (den == 0)
+	{
+		//		return 1 / ((uint32_t)den);
 		return 1;
 	}
 
-	while ((int64_t)den >= 0){
+	while ((int64_t)den >= 0)
+	{
 		den <<= 1;
 		qbit <<= 1;
 	}
 
-	while (qbit){
-		if (den <= num){
+	while (qbit)
+	{
+		if (den <= num)
+		{
 			num -= den;
 			quot += qbit;
 		}
@@ -271,46 +312,54 @@ uint64_t __udivmoddi4(uint64_t num, uint64_t den, uint64_t *rem_p){
 	return quot;
 }
 
-uint64_t __umoddi3(uint64_t num, uint64_t den){
+uint64_t __umoddi3(uint64_t num, uint64_t den)
+{
 	uint64_t v = 0;
 
-	(void) __udivmoddi4(num, den, &v);
+	(void)__udivmoddi4(num, den, &v);
 	return v;
 }
 
-uint64_t __udivdi3(uint64_t num, uint64_t den){
+uint64_t __udivdi3(uint64_t num, uint64_t den)
+{
 	return __udivmoddi4(num, den, NULL);
 }
 
-int64_t __moddi3(int64_t num, int64_t den){
+int64_t __moddi3(int64_t num, int64_t den)
+{
 	int minus = 0;
 	int64_t v = 0;
 
-	if (num < 0){
+	if (num < 0)
+	{
 		num = -num;
 		minus = 1;
 	}
-	if (den < 0){
+	if (den < 0)
+	{
 		den = -den;
 		minus ^= 1;
 	}
 
-	(void) __udivmoddi4(num, den, (uint64_t *)&v);
+	(void)__udivmoddi4(num, den, (uint64_t *)&v);
 	if (minus)
 		v = -v;
 
 	return v;
 }
 
-int64_t __divdi3(int64_t num, int64_t den){
+int64_t __divdi3(int64_t num, int64_t den)
+{
 	int minus = 0;
 	int64_t v;
 
-	if (num < 0){
+	if (num < 0)
+	{
 		num = -num;
 		minus = 1;
 	}
-	if (den < 0){
+	if (den < 0)
+	{
 		den = -den;
 		minus ^= 1;
 	}
@@ -322,7 +371,6 @@ int64_t __divdi3(int64_t num, int64_t den){
 	return v;
 }
 
-
 /* delay routines */
 
 void _delay_ms(uint32_t msec)
@@ -333,14 +381,16 @@ void _delay_ms(uint32_t msec)
 	last = TIMER0;
 	delta = msecs = 0;
 	cycles_per_msec = CPU_SPEED / 1000;
-	while (msec > msecs) {
+	while (msec > msecs)
+	{
 		cur = TIMER0;
 		if (cur < last)
 			delta += (cur + (CPU_SPEED - last));
 		else
 			delta += (cur - last);
 		last = cur;
-		if (delta >= cycles_per_msec) {
+		if (delta >= cycles_per_msec)
+		{
 			msecs += delta / cycles_per_msec;
 			delta %= cycles_per_msec;
 		}
@@ -355,20 +405,21 @@ void _delay_us(uint32_t usec)
 	last = TIMER0;
 	delta = usecs = 0;
 	cycles_per_usec = CPU_SPEED / 1000000;
-	while (usec > usecs) {
+	while (usec > usecs)
+	{
 		cur = TIMER0;
 		if (cur < last)
 			delta += (cur + (CPU_SPEED - last));
 		else
 			delta += (cur - last);
 		last = cur;
-		if (delta >= cycles_per_usec) {
+		if (delta >= cycles_per_usec)
+		{
 			usecs += delta / cycles_per_usec;
 			delta %= cycles_per_usec;
 		}
 	}
 }
-
 
 /* kernel auxiliary routines */
 
@@ -380,7 +431,7 @@ void timer1ctc_handler(void)
 void _hardware_init(void)
 {
 	_di();
-	TIMER1PRE = TIMERPRE_DIV16;
+	TIMER1PRE = TIMERPRE_DIV4096;
 
 	/* unlock TIMER1 for reset */
 	TIMER1 = TIMERSET;
@@ -392,12 +443,12 @@ void _hardware_init(void)
 
 void _timer_enable(void)
 {
-	TIMERMASK |= MASK_TIMER1CTC;		/* enable interrupt mask for TIMER1 CTC events */
+	TIMERMASK |= MASK_TIMER1CTC; /* enable interrupt mask for TIMER1 CTC events */
 }
 
 void _timer_disable(void)
 {
-	TIMERMASK &= ~MASK_TIMER1CTC;		/* disable interrupt mask for TIMER1 CTC events */
+	TIMERMASK &= ~MASK_TIMER1CTC; /* disable interrupt mask for TIMER1 CTC events */
 }
 
 void _interrupt_tick(void)

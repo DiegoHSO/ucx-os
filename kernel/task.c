@@ -24,7 +24,7 @@ int32_t ucx_task_add(void *task, uint16_t guard_size, uint16_t capacity, uint16_
 	kcb_p->tcb_p->remaining_period = period;
 	kcb_p->tcb_p->capacity = capacity;
 	kcb_p->tcb_p->remaining_capacity = capacity;
-	kcb_p->tcb_p->deadline_losses = 0;
+	kcb_p->tcb_p->deadline_misses = 0;
 	
 	return 0;
 }
@@ -66,9 +66,6 @@ void ucx_task_init(void)
 	if (!setjmp(kcb_p->tcb_p->context)) {
 		kcb_p->tcb_p->state = TASK_READY;
 		if (kcb_p->tcb_p->tcb_next == kcb_p->tcb_first) {
-			// PERGUNTAR SE EH SEGURO FAZER ISSO
-			kcb_p->tcb_p = kcb_p->tcb_p->tcb_next;
-			// FIM PERGUNTA
 			kcb_p->tcb_p->state = TASK_RUNNING;			
 		} else {
 			kcb_p->tcb_p = kcb_p->tcb_p->tcb_next;
