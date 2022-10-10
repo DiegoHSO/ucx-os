@@ -69,6 +69,7 @@ void krnl_sched_init(int32_t preemptive)
 
 uint16_t krnl_schedule(void)
 {
+	// PERGUNTAR SE DEVE IMPLEMENTAR AQUI AS ESTATISTICAS DAS TAREFAS PERIODICAS
 	if (kcb_p->tcb_p->state == TASK_RUNNING)
 		kcb_p->tcb_p->state = TASK_READY;
 	// inicio do round robin
@@ -90,7 +91,6 @@ int16_t krnl_rm(void)
 {
 	kcb_p->tcb_p->remaining_capacity = kcb_p->tcb_p->period == 0 ? 0 : kcb_p->tcb_p->remaining_capacity - 1;
 
-	// lembrar de descontar o remaining_period de cada tarefa a cada interrupcao
 	if (kcb_p->tcb_p->state == TASK_RUNNING)
 		kcb_p->tcb_p->state = TASK_READY;
 
@@ -100,10 +100,10 @@ int16_t krnl_rm(void)
 	uint16_t idle_tasks = 0;
 	uint16_t id = 0;
 
-	// desconta o periodo restante de cada tarefa e reinicializa as capacidades das tarefas como novo periodo
-	do {
+	// desconta o periodo restante de cada tarefa, reinicializa as capacidades das tarefas com o novo periodo e verifica se houve perda de deadline
 		number_of_tasks++; // incrementa o contador do numero de tarefas
 		kcb_p->tcb_p = kcb_p->tcb_p->tcb_next; // avanca para a proxima tarefa
+		kcb_p->tcb_p->deadline_losses = kcb_p->tcb_p->remaining_period == 1 && kcb_p->tcb_p->remaining_capacity > 0 ? kcb_p->tcb_p->deadline_losses + 1 : kcb_p->tcb_p->deadline_losses; // verifica se a tarefa perdeu deadline
 		kcb_p->tcb_p->remaining_capacity = kcb_p->tcb_p->remaining_period == 1 ? kcb_p->tcb_p->capacity : kcb_p->tcb_p->remaining_capacity;
 		kcb_p->tcb_p->remaining_period = kcb_p->tcb_p->remaining_period < 2 ? kcb_p->tcb_p->period : kcb_p->tcb_p->remaining_period - 1;
 	} while (kcb_p->tcb_p != tcb); // enquanto o ponteiro nao der uma volta completa

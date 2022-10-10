@@ -24,6 +24,7 @@ int32_t ucx_task_add(void *task, uint16_t guard_size, uint16_t capacity, uint16_
 	kcb_p->tcb_p->remaining_period = period;
 	kcb_p->tcb_p->capacity = capacity;
 	kcb_p->tcb_p->remaining_capacity = capacity;
+	kcb_p->tcb_p->deadline_losses = 0;
 	
 	return 0;
 }
