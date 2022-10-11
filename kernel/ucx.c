@@ -53,7 +53,6 @@ void krnl_sched_init(int32_t preemptive)
 
 uint16_t krnl_schedule(void)
 {
-	// PERGUNTAR SE DEVE IMPLEMENTAR AQUI AS ESTATISTICAS DAS TAREFAS PERIODICAS
 	if (kcb_p->tcb_p->state == TASK_RUNNING)
 		kcb_p->tcb_p->state = TASK_READY;
 
@@ -71,7 +70,6 @@ uint16_t krnl_schedule(void)
 	return kcb_p->tcb_p->id;
 }
 
-// task perdeu deadline? ignora o resto das computacoes e segue em frente
 int16_t krnl_rm(void)
 {
 	kcb_p->tcb_p->remaining_capacity = kcb_p->tcb_p->period == 0 ? 0 : kcb_p->tcb_p->remaining_capacity - 1;
@@ -87,18 +85,18 @@ int16_t krnl_rm(void)
 
 	// desconta o periodo restante de cada tarefa, reinicializa as capacidades das tarefas com o novo periodo e verifica se houve perda de deadline
 	do {
-		number_of_tasks++; // incrementa o contador do numero de tarefas
-		kcb_p->tcb_p = kcb_p->tcb_p->tcb_next; // avanca para a proxima tarefa
-		kcb_p->tcb_p->deadline_misses = kcb_p->tcb_p->remaining_period == 1 && kcb_p->tcb_p->remaining_capacity > 0 ? kcb_p->tcb_p->deadline_misses + 1 : kcb_p->tcb_p->deadline_misses; // verifica se a tarefa perdeu deadline
+		number_of_tasks++;
+		kcb_p->tcb_p = kcb_p->tcb_p->tcb_next;
+		kcb_p->tcb_p->deadline_misses = kcb_p->tcb_p->remaining_period == 1 && kcb_p->tcb_p->remaining_capacity > 0 ? kcb_p->tcb_p->deadline_misses + 1 : kcb_p->tcb_p->deadline_misses;
 		kcb_p->tcb_p->remaining_capacity = kcb_p->tcb_p->remaining_period == 1 ? kcb_p->tcb_p->capacity : kcb_p->tcb_p->remaining_capacity;
 		kcb_p->tcb_p->remaining_period = kcb_p->tcb_p->remaining_period < 2 ? kcb_p->tcb_p->period : kcb_p->tcb_p->remaining_period - 1;
-	} while (kcb_p->tcb_p != tcb); // enquanto o ponteiro nao der uma volta completa
+	} while (kcb_p->tcb_p != tcb);
 
 	// conta quantas tarefas nao possuem mais computacoes a serem feitas dentro do seu periodo
 	do {
 		kcb_p->tcb_p = kcb_p->tcb_p->tcb_next;
 		idle_tasks = kcb_p->tcb_p->remaining_capacity == 0 ? idle_tasks + 1 : idle_tasks;
-	} while (kcb_p->tcb_p != tcb); // enquanto o ponteiro nao der uma volta completa
+	} while (kcb_p->tcb_p != tcb);
 
 	// se nao ha tarefas a serem executadas com o RM, retorna -1 para que possa ir por round robin
 	if (idle_tasks == number_of_tasks) {
@@ -115,10 +113,10 @@ int16_t krnl_rm(void)
 				 kcb_p->tcb_p->remaining_capacity == 0 || 
 				 kcb_p->tcb_p->period > lowest_period);
 		lowest_period = kcb_p->tcb_p->period;
-	} while (kcb_p->tcb_p->id != id); // caso tenha passado duas vezes por uma mesma tarefa, significa que ela eh a tarefa com menor periodo
+	} while (kcb_p->tcb_p->id != id);
 
 	kcb_p->tcb_p->state = TASK_RUNNING;
-	kcb_p->ctx_switches++; // incrementa o numero de trocas de contexto
+	kcb_p->ctx_switches++;
 	
 	return id;
 }
@@ -128,9 +126,8 @@ void krnl_dispatcher(void)
 	if (!setjmp(kcb_p->tcb_p->context)) {
 		krnl_delay_update();
 		krnl_guard_check();
-		// periodos de 1s / interrupcoes a cada 1s
-		int16_t id = krnl_rm();
 
+		int16_t id = krnl_rm();
 		// caso nao haja tarefas a serem executadas com o RM, segue em frente com o round robin
 		if (id < 0)
 			krnl_schedule();

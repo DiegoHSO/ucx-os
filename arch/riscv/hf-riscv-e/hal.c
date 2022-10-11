@@ -431,6 +431,7 @@ void timer1ctc_handler(void)
 void _hardware_init(void)
 {
 	_di();
+	// interrupcoes a cada aprox. 1s
 	TIMER1PRE = TIMERPRE_DIV4096;
 
 	/* unlock TIMER1 for reset */
