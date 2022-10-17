@@ -83,6 +83,14 @@ hello_p: incl hal ucx
 	$(CC) $(CFLAGS) -o hello_preempt.o app/hello_preempt.c
 	@$(MAKE) --no-print-directory link
 
+hello_p2: incl hal ucx
+	$(CC) $(CFLAGS) -o hello_preempt2.o app/hello_preempt2.c
+	@$(MAKE) --no-print-directory link
+
+hello_p3: incl hal ucx
+	$(CC) $(CFLAGS) -o hello_preempt3.o app/hello_preempt3.c
+	@$(MAKE) --no-print-directory link
+
 mutex: incl hal ucx
 	$(CC) $(CFLAGS) -o mutex.o app/mutex.c
 	@$(MAKE) --no-print-directory link

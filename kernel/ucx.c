@@ -56,14 +56,13 @@ uint16_t krnl_schedule(void)
 	if (kcb_p->tcb_p->state == TASK_RUNNING)
 		kcb_p->tcb_p->state = TASK_READY;
 
-	// inicio do round robin
 	do {
 		do {
 			kcb_p->tcb_p = kcb_p->tcb_p->tcb_next;
 		} while (kcb_p->tcb_p->state != TASK_READY || kcb_p->tcb_p->period > 0);
 	} while (--kcb_p->tcb_p->priority & 0xff);
 	kcb_p->tcb_p->priority |= (kcb_p->tcb_p->priority >> 8) & 0xff;
-	// fim do round robin
+	
 	kcb_p->tcb_p->state = TASK_RUNNING;
 	kcb_p->ctx_switches++;
 	
